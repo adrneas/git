@@ -1,0 +1,495 @@
+<html>
+<head>
+    <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+    <title>WHATNOW</title>
+
+    <style type="text/css">
+    
+        #mototaxi { position:fixed;left:50%;  margin-left:-256px; top:50%; margin-top:-256px; }
+        #div_pontos{ position:fixed;left:50%; }
+    </style>
+</head>
+  <body>  
+    <img id="tile" src="sprites/planettile.png" style="display:none;">
+    
+    <img id="arvore" src="sprites/arvore.png" style="display:none;">
+      
+    <div id="div_pontos" width="544" height="100"> <h3>PONTOS: <span id="pontos">0</span></h3></div> 
+      
+    <canvas id="mototaxi" width="544" height="544" style="border:1px solid #000000;">
+    </canvas>
+      
+    
+<script>
+    
+
+
+window.onload = function() { 
+
+	var canvas = document.getElementById("mototaxi");
+	var ctx = canvas.getContext("2d");
+	var img = document.getElementById("tile");
+    var imgArvore = document.getElementById("arvore");
+
+    
+	var tileArray=[1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,3,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,2,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,3,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,4,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0];
+    
+	var personX=8;
+	var personY=8;
+    
+    var right=0;
+    var down=0;
+    
+    var lastDirect;
+	
+	var personPos = [personX][personY];
+	
+    var newLine=[];
+    
+	var pontos=0;
+	
+	var mapPosX;
+	var mapPosY;
+	var cont1movmap2=0;
+	var map = [];
+    var mapArvore = [
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    ]
+
+    var time;
+
+    var cont;
+    var moveu;
+    var menosy;
+    var menosy2;
+    function drawPerson(){
+      ctx.drawImage(img,64,0,32,32,personX*32,personY*32,32,32); 
+    }
+
+    function novoJogo(){
+        mapArvore = [
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    ];
+        map=[];
+        geraMapa();
+        geraZonaNeutra();
+        
+        mapPosX=0;
+        mapPosY=0;
+        menosy=32;
+        menosy2=32;
+        cont=32;
+        moveu=0;
+        contArvore=32;
+        pontos=0;
+        right=251;
+        down=252;
+        cont1movmap2=0;
+        document.getElementById('pontos').innerHTML = pontos;
+        desenhaMapa();
+        down--;
+        drawPerson();
+        desenhaMapaSuperior();
+
+        //desenhaMapaSuperior();
+
+    }
+
+
+    function geraMapa(){
+        
+        for(var j=0; j<501;j++){
+            newLine=[];
+            for(var i=0; i<501;i++){ 
+                newLine.push(tileArray[Math.floor(Math.random() * tileArray.length)]);    
+            }
+            
+            map.push(newLine);
+        }
+
+    }
+    function geraZonaNeutra(){
+        for(var j=259;j<262;j++){
+            for (var i = 259; i <262; i++) {
+                map[j][i]=0; 
+            };
+        }
+    }
+	//desenha mapa
+	function desenhaMapa(){
+
+        if (cont==32){
+
+            for(var i=down; i<19+down; i++){
+
+                mapPosX=-32;
+
+                for(var k=right; k<19+right; k++){
+                       
+                    var posy=i-down;
+                    if (map[i][k]==0){
+                        mapArvore[posy][k-right]=0;
+                        ctx.drawImage(img,0,0,32,32,mapPosX,mapPosY,32,32);
+
+                    } else if(map[i][k]==1){
+                        mapArvore[posy][k-right]=0;
+                        ctx.drawImage(img,32,0,32,32,mapPosX,mapPosY,32,32);
+                        
+                    } else if (map[i][k]==2){
+
+                        mapArvore[posy][k-right]=0;
+                        ctx.drawImage(img,96,0,32,32,mapPosX,mapPosY,32,32);
+
+                    } else if (map[i][k]==3){
+
+                        ctx.drawImage(img,160,0,32,32,mapPosX,mapPosY,32,32);
+
+                        mapArvore[posy][k-right]=0;
+                    } else if (map[i][k]==4){
+
+                        ctx.drawImage(img,128,0,32,32,mapPosX,mapPosY,32,32);
+
+                        mapArvore[posy][k-right]=1;
+                    }
+                    mapPosX+=32;
+                }
+
+                mapPosY+=32;
+            }
+
+            mapPosX=-32;
+            mapPosY=-32;
+            cont=2;
+
+        } else {
+            
+            for(var i=down; i<19+down; i++){
+                mapPosX=-32;
+                for(var k=right; k<19+right; k++){
+                    if (lastDirect=="direita"){
+                        if (map[i][k]==0){
+                            
+                            ctx.drawImage(img,0,0,32,32,mapPosX-cont,mapPosY,32,32);
+                        }
+                        else if(map[i][k]==1){
+                            ctx.drawImage(img,32,0,32,32,mapPosX-cont,mapPosY,32,32);
+                            
+                        }else if (map[i][k]==2){
+                            ctx.drawImage(img,96,0,32,32,mapPosX-cont,mapPosY,32,32);
+                        }else if (map[i][k]==3){
+                            ctx.drawImage(img,160,0,32,32,mapPosX-cont,mapPosY,32,32);
+                        }else if (map[i][k]==4){
+                            ctx.drawImage(img,128,0,32,32,mapPosX-cont,mapPosY,32,32);
+                        }
+                    } else if (lastDirect=="esquerda"){
+                        if (map[i][k]==0){
+                            
+                            ctx.drawImage(img,0,0,32,32,mapPosX+cont,mapPosY,32,32);
+                        }
+                        else if(map[i][k]==1){
+                            ctx.drawImage(img,32,0,32,32,mapPosX+cont,mapPosY,32,32);
+                            
+                        }else if (map[i][k]==2){
+                            ctx.drawImage(img,96,0,32,32,mapPosX+cont,mapPosY,32,32);
+                        }else if (map[i][k]==3){
+                            ctx.drawImage(img,160,0,32,32,mapPosX+cont,mapPosY,32,32);
+                        }else if (map[i][k]==4){
+                            ctx.drawImage(img,128,0,32,32,mapPosX+cont,mapPosY,32,32);
+                        }
+                    } else if (lastDirect=="baixo"){
+                        if (map[i][k]==0){
+                            
+                            ctx.drawImage(img,0,0,32,32,mapPosX,mapPosY-cont,32,32);
+                        }
+                        else if(map[i][k]==1){
+                            ctx.drawImage(img,32,0,32,32,mapPosX,mapPosY-cont,32,32);
+                            
+                        }else if (map[i][k]==2){
+                            ctx.drawImage(img,96,0,32,32,mapPosX,mapPosY-cont,32,32);
+                        }else if (map[i][k]==3){
+                            ctx.drawImage(img,160,0,32,32,mapPosX,mapPosY-cont,32,32);
+                        }else if (map[i][k]==4){
+                            ctx.drawImage(img,128,0,32,32,mapPosX,mapPosY-cont,32,32);
+                        }
+                    } else if (lastDirect=="cima"){
+                        
+                        if (map[i][k]==0){
+                            
+                            ctx.drawImage(img,0,0,32,32,mapPosX,mapPosY+cont,32,32);
+                        }
+                        else if(map[i][k]==1){
+                            ctx.drawImage(img,32,0,32,32,mapPosX,mapPosY+cont,32,32);
+                            
+                        }else if (map[i][k]==2){
+                            ctx.drawImage(img,96,0,32,32,mapPosX,mapPosY+cont,32,32);
+                        }else if (map[i][k]==3){
+                            ctx.drawImage(img,160,0,32,32,mapPosX,mapPosY+cont,32,32);
+                        }else if (map[i][k]==4){
+                            ctx.drawImage(img,128,0,32,32,mapPosX,mapPosY+cont,32,32);
+                        }
+                    }
+                    mapPosX+=32;
+                }
+                mapPosY+=32;
+            }
+            mapPosX=-32;
+            mapPosY=-32;
+            cont+=2;
+        }
+    }
+    function desenhaMapaSuperior(){
+
+        if (contArvore==32){
+
+            mapPosY=-32+menosy;
+            for(var i=0; i<19; i++){
+
+                mapPosX=-32;
+
+                for(var k=0; k<19; k++){
+
+                    if (mapArvore[i][k]==1){
+
+                        ctx.drawImage(imgArvore,mapPosX-64,mapPosY-96);
+
+                    }
+
+                    mapPosX+=32;
+                }
+
+                mapPosY+=32;
+            }
+            mapPosX=-32;
+            menosy=0;
+            contArvore=2;
+
+
+        } else {
+            mapPosY=-32+menosy2;
+            for(var i=0; i<19; i++){
+
+                mapPosX=-32;
+
+                for(var k=0; k<19; k++){
+
+                    if (lastDirect=="direita"){
+
+                        if (mapArvore[i][k]==1){
+
+                            temp=contArvore+64;
+                            ctx.drawImage(imgArvore,mapPosX-temp,mapPosY-96);
+
+                        }
+
+                    } else if (lastDirect=="esquerda"){ 
+
+                        if(mapArvore[i][k]==1){
+
+                            temp=contArvore-64;
+                            ctx.drawImage(imgArvore,mapPosX+temp,mapPosY-96);
+                            
+                        }
+
+                    }else if (lastDirect=="cima"){
+                        
+                        if(mapArvore[i][k]==1){
+
+                            temp=contArvore-96;
+                            ctx.drawImage(imgArvore,mapPosX-64,mapPosY+temp);
+                            
+                        }
+
+                    }else if (lastDirect=="baixo"){
+
+                        if (mapArvore[i][k]==1){
+                            
+                            temp=contArvore+96;
+                            ctx.drawImage(imgArvore,mapPosX-64,mapPosY-temp);
+                        }
+                    }
+
+                    mapPosX+=32;
+
+                }
+
+                mapPosY+=32;
+
+            }
+
+            mapPosX=-32;
+            mapPosY=-32;
+            contArvore+=2;
+            cont1movmap2++;
+            if(cont1movmap2==16){menosy2=0;}
+
+        }
+    }
+	function colision(){
+        if (cont==32){
+            clearInterval(time);
+            moveu=0;
+        }
+            tmp=right+9;
+            tmp2=down+9;
+        if (map[tmp2][tmp]==0){
+            desenhaMapa();
+            drawPerson();
+            desenhaMapaSuperior();
+        }else if (map[tmp2][tmp]==1){
+            
+            clearInterval(time);
+            moveu=0;
+            alert("Bateste foi.. Fizeste um total de "+pontos+" pontos!");
+            ctx.clearRect(0,0,canvas.width,canvas.height)
+            novoJogo();
+       
+        }else if (map[tmp2][tmp]==2){
+            map[tmp2][tmp]=0;
+
+            desenhaMapa();
+            drawPerson();
+            desenhaMapaSuperior();
+            
+            alert("Encontraste um CLONE feito pelo DOC ALBIERE");
+            pontos+=5;
+            document.getElementById('pontos').innerHTML = pontos;
+        }else if (map[tmp2][tmp]==3){
+            
+            clearInterval(time);
+            moveu=0;
+            alert("Achaste que o espinho era de rosas? Morto ficaste.. Fizeste um total de "+pontos+" pontos!");
+            ctx.clearRect(0,0,canvas.width,canvas.height)
+            novoJogo();
+       
+        }else if (map[tmp2][tmp]==4){
+            
+            alert("Encontraste uma ArvoRE feita pelo DeUS");
+            pontos+=5;
+            document.getElementById('pontos').innerHTML = pontos;
+
+            clearInterval(time);
+            moveu=0;
+            cont=2;
+        }
+    }
+       
+    
+    function quebraPedra(lastDirect){
+        
+        
+    }
+
+    function movePersonUp(){
+
+        if (cont==32){
+
+            down--;
+        }
+
+        colision();
+    }
+
+    function movePersonDown(){
+        
+        if (cont==32){
+            
+            down++;
+        };
+        colision();  
+    }
+
+    function movePersonRight(){
+        
+        if (cont==32){
+            
+            right++;
+        }
+        colision();
+         
+    }
+
+    function movePersonLeft(){
+
+        if (cont==32){
+            
+            right--;
+        }
+        colision();
+        
+    }
+
+
+	$(function(){
+		$(document).keyup(function(e){
+            if (cont==2 && moveu==0){
+                if(e.keyCode==38){ //move pra cima
+                    lastDirect="cima";
+                    moveu=1;
+                    time = window.setInterval(movePersonUp,25);
+                    
+                }else if(e.keyCode==39){ // move pra direita
+                    lastDirect="direita";
+                    moveu=1;
+                    time = window.setInterval(movePersonRight,25);
+                }else if(e.keyCode==40){ //move pra baixo
+                    lastDirect="baixo";
+                    moveu=1;
+                    time = window.setInterval(movePersonDown,25);
+                }else if(e.keyCode==37){ // move pra esquerda
+
+                    lastDirect="esquerda";
+                    moveu=1;
+                    time = window.setInterval(movePersonLeft,25);
+                }
+            }
+            
+            			
+		});
+		
+	});
+
+    novoJogo();
+}
+
+
+</script>
+    
+
+    </body>
+</html>
